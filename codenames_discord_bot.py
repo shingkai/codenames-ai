@@ -89,13 +89,15 @@ class GameStatusView(discord.ui.View):
             message += f"{self.game.turn} turn\n"
             message += f"RED: {self.game.remaining['RED']} | BLUE: {self.game.remaining['BLUE']}"
         else:
-            self.disable_board()
             if (self.game.assassinated is not None):
                 message += f"{self.game.assassinated} team hit the assassin!\n"
             message += f"{winner} team wins!\n"
         return message
 
-                
+    def disable_pass_button(self):
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
 
 class CardButton(discord.ui.Button):
     """
@@ -113,6 +115,9 @@ class CardButton(discord.ui.Button):
             return
         self.style = CardButton.color_to_style(color)
         self.disabled = True
+        if (self.view.game.winner() is not None):
+            self.view.disable_board()
+            self.view.status_view.disable_pass_button()
         await interaction.response.edit_message(content=f"{self.view.game.turn} team guessed {self.label}, which was {color}", view=self.view)
         await self.view.status_message.edit(content=self.view.status_view.status_message(), view=self.view.status_view)
 
@@ -125,7 +130,7 @@ class CardButton(discord.ui.Button):
         if (color == "GREY"):
             return discord.ButtonStyle.secondary
         if (color == "BLACK"):
-            return discord.ButtonStyle.secondary
+            return discord.ButtonStyle.success
         if (color is None):
             return discord.ButtonStyle.success
 
