@@ -3,7 +3,7 @@ from typing import Literal, Optional
 import random
 
 env = dotenv_values('.env')
-WORD_POOL_FILE = '../words/game_wordpool.txt'
+WORD_POOL_FILE = env["WORD_POOL_FILE"]
 
 Team = Literal["RED", "BLUE"]
 CardColor = Literal["RED", "BLUE", "GREY", "BLACK"]
