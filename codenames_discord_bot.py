@@ -1,19 +1,21 @@
-from dotenv import dotenv_values
 import logging
-from typing import Literal
+from typing import Union
+
 import discord
 from discord import app_commands
+from dotenv import dotenv_values
+
 from codenames_engine import Codenames, Team, CardColor
 
 
 def color_emoji(color: CardColor) -> str:
-    if (color == "RED"):
+    if color == "RED":
         return "🟥"
-    if (color == "BLUE"):
+    if color == "BLUE":
         return "🟦"
-    if (color == "GREY"):
+    if color == "GREY":
         return "⬜"
-    if (color == "BLACK"):
+    if color == "BLACK":
         return "⬛"
 
 
@@ -23,6 +25,7 @@ class SpymasterSelect(discord.ui.UserSelect):
 
     TODO: If the Codenames-AI bot is selected, a codenames AI will generate the clues for its respective team
     """
+
     def __init__(self, team: Team):
         super().__init__(
             placeholder=f"Select {color_emoji(team)} {team} Spymaster...",
@@ -30,76 +33,77 @@ class SpymasterSelect(discord.ui.UserSelect):
         self.team = team
 
     async def callback(self, interaction: discord.Interaction):
-        users: List[Union[discord.Member, discord.User]] = self.values
+        users: list[Union[discord.Member, discord.User]] = self.values
         for user in users:
-            if (user.bot is not True):
+            if user.bot is not True:
                 dm = await user.create_dm()
-                await dm.send(f"You were selected to be {color_emoji(self.team)} {self.team} Spymaster", view=SpymasterView(self.view.game))
+                await dm.send(f"You were selected to be {color_emoji(self.team)} {self.team} Spymaster",
+                              view=SpymasterView(self.view.game))
             else:
                 # TODO: enable spymaster AI if the bot is selected
                 return
-        if (len(users) > 0):
+        if len(users) > 0:
             self.disabled = True
             await interaction.message.delete()
-
 
 
 class SpymasterSelectView(discord.ui.View):
     """
     View containing the SpymasterSelect dropdown
     """
+
     def __init__(self, game: Codenames, team: Team):
         super().__init__()
         self.game = game
         self.add_item(SpymasterSelect(team))
 
 
-        
 class SpymasterView(discord.ui.View):
     """
     View containing the board with colors revealed (for spymaster eyes only)
     """
+
     def __init__(self, game: Codenames):
         super().__init__()
         self.game = game
         cards = self.game.board.hidden_cards()
         for x in range(5):
             for y in range(5):
-                self.add_item(CardButton(x, y, cards[x*5+y][0], cards[x*5+y][1], True))
-
+                self.add_item(CardButton(x, y, cards[x * 5 + y][0], cards[x * 5 + y][1], True))
 
 
 class PassTurnButton(discord.ui.Button):
     """
     Button to allow players to pass the turn to the opposing team
     """
+
     def __init__(self):
         super().__init__(label="PASS TURN")
 
     async def callback(self, interaction: discord.Interaction):
         self.view.game.end_turn()
-        await interaction.response.edit_message(content=self.view.status_message() , view=self.view)
+        await interaction.response.edit_message(content=self.view.status_message(), view=self.view)
 
 
-        
 class GameStatusView(discord.ui.View):
     """
     View containing the status of the game, including which team's turn it is, as well as the number of hidden words remaining for each team.
     Also contains the PassTurnButton, which cannot be in the main PublicBoardView as there is a limit to 25 items per view.
     """
+
     def __init__(self, game: Codenames):
         super().__init__()
         self.game = game
         self.add_item(PassTurnButton())
-    
+
     def status_message(self) -> str:
         winner = self.game.winner()
         message = ""
-        if (winner is None):
+        if winner is None:
             message += f"{color_emoji(self.game.turn)} {self.game.turn} turn\n"
             message += f"{color_emoji('RED')} RED: {self.game.remaining['RED']} | {color_emoji('BLUE')} BLUE: {self.game.remaining['BLUE']}"
         else:
-            if (self.game.assassinated is not None):
+            if self.game.assassinated is not None:
                 message += f"{color_emoji(self.game.assassinated)} {self.game.assassinated} team hit the 🥷 assassin!\n"
             message += f"{color_emoji(winner)} {winner} team wins!\n"
         return message
@@ -109,47 +113,50 @@ class GameStatusView(discord.ui.View):
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
 
+
 class CardButton(discord.ui.Button):
     """
     A button representing a card on the board. May be unrevealed (green colored) or revealed (red, blue, or grey colored and disabled)
     """
-    def __init__(self, x: int, y: int, word, color=None, disabled=False): 
+
+    def __init__(self, x: int, y: int, word, color=None, disabled=False):
         super().__init__(style=CardButton.color_to_style(color), label=word, row=y, disabled=disabled)
         self.x = x
         self.y = y
         if color == "BLACK":
-            self.label = "🥷 " + word 
+            self.label = "🥷 " + word
 
     async def callback(self, interaction: discord.Interaction):
         assert self.view is not None
         prev_turn = self.view.game.turn
         color = self.view.game.guess(self.label)
-        if (color is None):
+        if color is None:
             return
         self.style = CardButton.color_to_style(color)
         self.disabled = True
         if color == "BLACK":
             self.label = "🥷 " + self.label
-        if (self.view.game.winner() is not None):
+        if self.view.game.winner() is not None:
             self.view.disable_board()
             self.view.status_view.disable_pass_button()
-        await interaction.response.edit_message(content=f"{color_emoji(prev_turn)} {prev_turn} team guessed {self.label}, which was {color_emoji(color)} {color}", view=self.view)
+        await interaction.response.edit_message(
+            content=f"{color_emoji(prev_turn)} {prev_turn} team guessed {self.label}, which was {color_emoji(color)} {color}",
+            view=self.view)
         await self.view.status_message.edit(content=self.view.status_view.status_message(), view=self.view.status_view)
 
     @staticmethod
     def color_to_style(color) -> discord.ButtonStyle:
-        if (color == "RED"):
+        if color == "RED":
             return discord.ButtonStyle.danger
-        if (color == "BLUE"):
+        if color == "BLUE":
             return discord.ButtonStyle.primary
-        if (color == "GREY"):
+        if color == "GREY":
             return discord.ButtonStyle.secondary
-        if (color == "BLACK"):
+        if color == "BLACK":
             return discord.ButtonStyle.success
-        if (color is None):
+        if color is None:
             return discord.ButtonStyle.success
 
-        
 
 class PublicBoardView(discord.ui.View):
     """
@@ -157,21 +164,21 @@ class PublicBoardView(discord.ui.View):
 
     This view has a reference to the GameStatusView and status_message to allow it to update the score and turn as buttons in this view are interacted with
     """
+
     def __init__(self, game: Codenames, status_view: GameStatusView):
         super().__init__()
         self.status_view = status_view
-        self.status_message: discord.WebhookMessage = None
+        self.status_message: discord.WebhookMessage
         self.game = game
         cards = self.game.board.public_cards()
         for x in range(5):
             for y in range(5):
-                self.add_item(CardButton(x,y, cards[x*5+y][0]))
+                self.add_item(CardButton(x, y, cards[x * 5 + y][0]))
 
     def disable_board(self):
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
-
 
 
 # init env vars
@@ -185,10 +192,11 @@ class CodenamesClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
-        
-## only sync when there is an update to the app_command definition, otherwise we may get throttled by discord
-#    async def setup_hook(self):
-#        await self.tree.sync()
+
+    # only sync when there is an update to the app_command definition,
+    # otherwise we may get throttled by disco
+    async def setup_hook(self):
+        await self.tree.sync()
 
 
 intents = discord.Intents.default()
@@ -200,7 +208,7 @@ async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
 
-                
+
 @client.tree.command()
 async def codenames(interaction: discord.Interaction):
     """Play a game of Codenames"""
@@ -209,10 +217,13 @@ async def codenames(interaction: discord.Interaction):
     public_view = PublicBoardView(game, status_view)
 
     await interaction.response.send_message(content=None, view=public_view)
-    public_view.status_message = await interaction.followup.send(content=status_view.status_message(), view=status_view, wait=True)
+    public_view.status_message = await interaction.followup.send(content=status_view.status_message(), view=status_view,
+                                                                 wait=True)
 
-    await interaction.followup.send(content=f'Select player to be RED Spymaster (AI players not yet enabled)', ephemeral=False, view=SpymasterSelectView(game, "RED"))
-    await interaction.followup.send(content=f'Select player to be BLUE Spymaster (AI players not yet enabled)', ephemeral=False, view=SpymasterSelectView(game, "BLUE"))
+    await interaction.followup.send(content=f'Select player to be RED Spymaster (AI players not yet enabled)',
+                                    ephemeral=False, view=SpymasterSelectView(game, "RED"))
+    await interaction.followup.send(content=f'Select player to be BLUE Spymaster (AI players not yet enabled)',
+                                    ephemeral=False, view=SpymasterSelectView(game, "BLUE"))
 
 
 client.run(config["TOKEN"])
