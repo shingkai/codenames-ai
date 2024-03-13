@@ -1,4 +1,5 @@
 from dotenv import dotenv_values
+import logging
 from typing import Literal, Optional
 import random
 
@@ -7,6 +8,12 @@ WORD_POOL_FILE = env["WORD_POOL_FILE"]
 
 Team = Literal["RED", "BLUE"]
 CardColor = Literal["RED", "BLUE", "GREY", "BLACK"]
+
+
+# init logging
+handler = logging.FileHandler('codenames.log')
+log = logging.getLogger('codenames_engine')
+log.addHandler(handler)
 
 
 class Codenames:
@@ -34,12 +41,12 @@ class Codenames:
         
     def guess(self, word) -> Optional[CardColor]:
         if (self.winner() is not None):
-            print(f"The game is over, {self.winner()} team has won the game!")
-            print(self.remaining)
+            log.info(f"The game is over, {self.winner()} team has won the game!")
+            log.info(self.remaining)
             return None
         card = self.board.reveal(word)
         if card is None:
-            print(f"Invalid guess: {word} is not an unrevealed card on the board")
+            log.warn(f"Invalid guess: {word} is not an unrevealed card on the board")
             return None
         if card.color == "BLACK":
             self.assassinated = self.turn
