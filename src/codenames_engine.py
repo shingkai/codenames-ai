@@ -1,18 +1,21 @@
+import os
 from dotenv import dotenv_values
 import logging
 from typing import Literal, Optional, Tuple
 import random
 
-env = dotenv_values('.env')
+PARENT_DIR = os.path.dirname(os.path.dirname(__file__))
+env = dotenv_values(os.path.join(PARENT_DIR, '.env'))
+
 WORD_POOL_FILE = env["WORD_POOL_FILE"]
+
+# init logging
+handler = logging.FileHandler('../codenames.log')
+log = logging.getLogger('codenames_engine')
+log.addHandler(handler)
 
 Team = Literal["RED", "BLUE"]
 CardColor = Literal["RED", "BLUE", "GREY", "BLACK"]
-
-# init logging
-handler = logging.FileHandler('codenames.log')
-log = logging.getLogger('codenames_engine')
-log.addHandler(handler)
 
 
 class Codenames:

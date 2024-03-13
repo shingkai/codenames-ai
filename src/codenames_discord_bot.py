@@ -182,10 +182,10 @@ class PublicBoardView(discord.ui.View):
 
 
 # init env vars
-config = dotenv_values(".env")
+config = dotenv_values("../.env")
 
 # init logging
-log = logging.FileHandler(filename='discord_bot.log', encoding='utf-8', mode='w')
+log = logging.FileHandler(filename='../discord_bot.log', encoding='utf-8', mode='w')
 
 
 class CodenamesClient(discord.Client):
