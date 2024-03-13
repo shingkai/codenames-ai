@@ -3,8 +3,18 @@ import logging
 from typing import Literal
 import discord
 from discord import app_commands
-from codenames_engine import Codenames, Team
+from codenames_engine import Codenames, Team, CardColor
 
+
+def color_emoji(color: CardColor) -> str:
+    if (color == "RED"):
+        return "🟥"
+    if (color == "BLUE"):
+        return "🟦"
+    if (color == "GREY"):
+        return "⬜"
+    if (color == "BLACK"):
+        return "⬛"
 
 
 class SpymasterSelect(discord.ui.UserSelect):
@@ -15,7 +25,7 @@ class SpymasterSelect(discord.ui.UserSelect):
     """
     def __init__(self, team: Team):
         super().__init__(
-            placeholder=f"Select {team} Spymaster...",
+            placeholder=f"Select {color_emoji(team)} {team} Spymaster...",
         )
         self.team = team
 
@@ -24,7 +34,7 @@ class SpymasterSelect(discord.ui.UserSelect):
         for user in users:
             if (user.bot is not True):
                 dm = await user.create_dm()
-                await dm.send(f"You were selected to be {self.team} Spymaster", view=SpymasterView(self.view.game))
+                await dm.send(f"You were selected to be {color_emoji(self.team)} {self.team} Spymaster", view=SpymasterView(self.view.game))
             else:
                 # TODO: enable spymaster AI if the bot is selected
                 return
@@ -86,12 +96,12 @@ class GameStatusView(discord.ui.View):
         winner = self.game.winner()
         message = ""
         if (winner is None):
-            message += f"{self.game.turn} turn\n"
-            message += f"RED: {self.game.remaining['RED']} | BLUE: {self.game.remaining['BLUE']}"
+            message += f"{color_emoji(self.game.turn)} {self.game.turn} turn\n"
+            message += f"{color_emoji('RED')} RED: {self.game.remaining['RED']} | {color_emoji('BLUE')} BLUE: {self.game.remaining['BLUE']}"
         else:
             if (self.game.assassinated is not None):
-                message += f"{self.game.assassinated} team hit the assassin!\n"
-            message += f"{winner} team wins!\n"
+                message += f"{color_emoji(self.game.assassinated)} {self.game.assassinated} team hit the 🥷 assassin!\n"
+            message += f"{color_emoji(winner)} {winner} team wins!\n"
         return message
 
     def disable_pass_button(self):
@@ -107,6 +117,8 @@ class CardButton(discord.ui.Button):
         super().__init__(style=CardButton.color_to_style(color), label=word, row=y, disabled=disabled)
         self.x = x
         self.y = y
+        if color == "BLACK":
+            self.label = "🥷 " + word 
 
     async def callback(self, interaction: discord.Interaction):
         assert self.view is not None
@@ -116,10 +128,12 @@ class CardButton(discord.ui.Button):
             return
         self.style = CardButton.color_to_style(color)
         self.disabled = True
+        if color == "BLACK":
+            self.label = "🥷 " + self.label
         if (self.view.game.winner() is not None):
             self.view.disable_board()
             self.view.status_view.disable_pass_button()
-        await interaction.response.edit_message(content=f"{prev_turn} team guessed {self.label}, which was {color}", view=self.view)
+        await interaction.response.edit_message(content=f"{color_emoji(prev_turn)} {prev_turn} team guessed {self.label}, which was {color_emoji(color)} {color}", view=self.view)
         await self.view.status_message.edit(content=self.view.status_view.status_message(), view=self.view.status_view)
 
     @staticmethod
@@ -171,7 +185,7 @@ class CodenamesClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
-
+        
 ## only sync when there is an update to the app_command definition, otherwise we may get throttled by discord
 #    async def setup_hook(self):
 #        await self.tree.sync()
