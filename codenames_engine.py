@@ -71,19 +71,19 @@ class Codenames:
 
         
 class Card:
-    def __init__(self, word: str, color: CardColor, visible: Optional[CardColor]=None):
+    def __init__(self, word: str, color: CardColor, revealed: Optional[CardColor]=None):
         self.word = word
         self.color = color
-        self.visible = visible
+        self.revealed = revealed
 
     def __repr__(self):
         return str(self)
     
     def __str__(self):
-        return f"{self.word} ({self.color}, visible={self.visible})"
+        return f"{self.word} ({self.color}, revealed={self.revealed})"
     
     def reveal(self):
-        self.visible = self.color
+        self.revealed = self.color
 
 
         
@@ -102,14 +102,14 @@ class Board:
         random.shuffle(self.cards)
 
     def public_cards(self):
-        return [ (card.word, card.visible) for card in self.cards ]
+        return [ (card.word, card.revealed) for card in self.cards ]
     
     def hidden_cards(self):
-        return [ (card.word, card.color) for card in self.cards]
+        return [ (card.word, card.color, card.revealed) for card in self.cards]
     
     def reveal(self, word) -> Optional[Card]:
         for card in self.cards:
-            if card.word == word and card.visible is None:
+            if card.word == word and card.revealed is None:
                 card.reveal()
                 return card
         return None
