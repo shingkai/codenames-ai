@@ -110,6 +110,7 @@ class CardButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         assert self.view is not None
+        prev_turn = self.view.game.turn
         color = self.view.game.guess(self.label)
         if (color is None):
             return
@@ -118,7 +119,7 @@ class CardButton(discord.ui.Button):
         if (self.view.game.winner() is not None):
             self.view.disable_board()
             self.view.status_view.disable_pass_button()
-        await interaction.response.edit_message(content=f"{self.view.game.turn} team guessed {self.label}, which was {color}", view=self.view)
+        await interaction.response.edit_message(content=f"{prev_turn} team guessed {self.label}, which was {color}", view=self.view)
         await self.view.status_message.edit(content=self.view.status_view.status_message(), view=self.view.status_view)
 
     @staticmethod
@@ -196,8 +197,8 @@ async def codenames(interaction: discord.Interaction):
     await interaction.response.send_message(content=None, view=public_view)
     public_view.status_message = await interaction.followup.send(content=status_view.status_message(), view=status_view, wait=True)
 
-    await interaction.followup.send(content=f'Select player to be RED Spymaster', ephemeral=False, view=SpymasterSelectView(game, "RED"))
-    await interaction.followup.send(content=f'Select player to be BLUE Spymaster', ephemeral=False, view=SpymasterSelectView(game, "BLUE"))
+    await interaction.followup.send(content=f'Select player to be RED Spymaster (AI players not yet enabled)', ephemeral=False, view=SpymasterSelectView(game, "RED"))
+    await interaction.followup.send(content=f'Select player to be BLUE Spymaster (AI players not yet enabled)', ephemeral=False, view=SpymasterSelectView(game, "BLUE"))
 
 
 client.run(config["TOKEN"])
