@@ -1,18 +1,20 @@
 import re
 from abc import ABC, abstractmethod
 from typing import Tuple
-
 from gensim.models import KeyedVectors
-
 from codenames_engine import Codenames, Team
 
 
-class InferenceEngine(ABC):
+class EmbeddingsModel(ABC):
     def __init__(self):
-        self.engine: KeyedVectors
+        self.model: KeyedVectors
 
     @abstractmethod
     def find_candidates(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[Tuple[str, float]]:
+        pass
+
+    @abstractmethod
+    def guess_word(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
         pass
 
 
@@ -20,9 +22,10 @@ class SpymasterAI(ABC):
     """
     An AI Spymaster player.
     """
-    def __init__(self, game: Codenames, engine: InferenceEngine):
+
+    def __init__(self, game: Codenames, model: EmbeddingsModel):
         self.game = game
-        self.model = engine
+        self.model = model
 
     @abstractmethod
     def find_clue(self, team: Team, n=3) -> list[Tuple[str, int]]:
@@ -41,6 +44,10 @@ class SpymasterAI(ABC):
 
 
 class GuesserAI:
-    def __init__(self, game: Codenames, ie: InferenceEngine):
+    def __init__(self, game: Codenames, model: EmbeddingsModel):
         self.game = game
-        self.ie = ie
+        self.model = model
+
+    @abstractmethod
+    def pick_board_words(self, word: str) -> list[tuple[str, float]]:
+        pass

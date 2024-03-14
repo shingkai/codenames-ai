@@ -1,11 +1,14 @@
 import logging
 from typing import Union
-
 import discord
 from discord import app_commands
 from dotenv import dotenv_values
-
 from codenames_engine import Codenames, Team, CardColor
+
+# init logging
+log = logging.getLogger(__name__)
+handler = logging.FileHandler(filename='../discord_bot.log', encoding='utf-8', mode='w')
+log.addHandler(handler)
 
 
 def color_emoji(color: CardColor) -> str:
@@ -170,7 +173,7 @@ class PublicBoardView(discord.ui.View):
         self.status_view = status_view
         self.status_message: discord.WebhookMessage
         self.game = game
-        cards = self.game.board.public_cards()
+        cards = self.game.board.public_words()
         for x in range(5):
             for y in range(5):
                 self.add_item(CardButton(x, y, cards[x * 5 + y][0]))
@@ -183,9 +186,6 @@ class PublicBoardView(discord.ui.View):
 
 # init env vars
 config = dotenv_values("../.env")
-
-# init logging
-log = logging.FileHandler(filename='../discord_bot.log', encoding='utf-8', mode='w')
 
 
 class CodenamesClient(discord.Client):

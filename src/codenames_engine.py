@@ -4,15 +4,12 @@ import logging
 from typing import Literal, Optional, Tuple
 import random
 
+log = logging.getLogger(__name__)
+
 PARENT_DIR = os.path.dirname(os.path.dirname(__file__))
 env = dotenv_values(os.path.join(PARENT_DIR, '.env'))
 
 WORD_POOL_FILE = env["WORD_POOL_FILE"]
-
-# init logging
-handler = logging.FileHandler('../codenames.log')
-log = logging.getLogger('codenames_engine')
-log.addHandler(handler)
 
 Team = Literal["RED", "BLUE"]
 CardColor = Literal["RED", "BLUE", "GREY", "BLACK"]
@@ -24,6 +21,9 @@ class Codenames:
         self.turn: Team = "RED"
         self.remaining = {"RED": 9, "BLUE": 8}
         self.assassinated: Optional[Team] = None
+
+    def public_words(self) -> list[str]:
+        return [word for (word, revealed) in self.board.public_cards() if revealed is None]
 
     def winner(self) -> Optional[Team]:
         if self.assassinated is not None:
