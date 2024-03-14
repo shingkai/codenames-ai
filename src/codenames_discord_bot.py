@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Union
 import discord
 from discord import app_commands
@@ -9,6 +10,10 @@ from codenames_engine import Codenames, Team, CardColor
 log = logging.getLogger(__name__)
 handler = logging.FileHandler(filename='../discord_bot.log', encoding='utf-8', mode='w')
 log.addHandler(handler)
+
+# init env vars
+PARENT_DIR = os.path.dirname(os.path.dirname(__file__))
+config = dotenv_values(os.path.join(PARENT_DIR, '.env'))
 
 
 def color_emoji(color: CardColor) -> str:
@@ -173,7 +178,7 @@ class PublicBoardView(discord.ui.View):
         self.status_view = status_view
         self.status_message: discord.WebhookMessage
         self.game = game
-        cards = self.game.board.public_words()
+        cards = self.game.board.public_cards()
         for x in range(5):
             for y in range(5):
                 self.add_item(CardButton(x, y, cards[x * 5 + y][0]))
@@ -182,10 +187,6 @@ class PublicBoardView(discord.ui.View):
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
-
-
-# init env vars
-config = dotenv_values("../.env")
 
 
 class CodenamesClient(discord.Client):
