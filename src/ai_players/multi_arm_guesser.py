@@ -1,4 +1,4 @@
-from src.codenames_ai import GuesserAI
+from codenames_ai import GuesserAI
 
 
 class MultiArmGuesser(GuesserAI):

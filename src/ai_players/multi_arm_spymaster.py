@@ -1,8 +1,8 @@
 from itertools import combinations
 from typing import Tuple
 
-from src.codenames_ai import SpymasterAI
-from src.codenames_engine import Team
+from codenames_ai import SpymasterAI
+from codenames_engine import Team
 
 
 class MultiArmSpy(SpymasterAI):

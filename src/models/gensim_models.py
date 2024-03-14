@@ -1,7 +1,7 @@
 import gensim.downloader as gs_api
 from typing import Tuple
 
-from src.codenames_ai import EmbeddingsModel
+from codenames_ai import EmbeddingsModel
 
 
 class GensimModel(EmbeddingsModel):

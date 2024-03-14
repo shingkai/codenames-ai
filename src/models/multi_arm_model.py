@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from src.codenames_ai import EmbeddingsModel
+from codenames_ai import EmbeddingsModel
 
 
 class MultiArmModel(EmbeddingsModel):

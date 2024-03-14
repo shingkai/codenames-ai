@@ -8,12 +8,12 @@ from codenames_engine import Codenames, Team, CardColor
 
 # init logging
 log = logging.getLogger(__name__)
-handler = logging.FileHandler(filename='../discord_bot.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='../../discord_bot.log', encoding='utf-8', mode='w')
 log.addHandler(handler)
 
 # init env vars
-PARENT_DIR = os.path.dirname(os.path.dirname(__file__))
-config = dotenv_values(os.path.join(PARENT_DIR, '.env'))
+ENV_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+config = dotenv_values(os.path.join(ENV_DIR, '.env'))
 
 
 def color_emoji(color: CardColor) -> str:
@@ -189,45 +189,3 @@ class PublicBoardView(discord.ui.View):
                 child.disabled = True
 
 
-class CodenamesClient(discord.Client):
-    def __init__(self, *, intents: discord.Intents):
-        super().__init__(intents=intents)
-        self.tree = app_commands.CommandTree(self)
-
-    # only sync when there is an update to the app_command definition,
-    # otherwise we may get throttled by disco
-    async def setup_hook(self):
-        await self.tree.sync()
-
-    async def on_ready(self):
-        print(f'Logged in as {client.user} (ID: {client.user.id})')
-        print('------')
-
-
-
-# create a client instance
-client = CodenamesClient(intents=discord.Intents.default())
-
-
-# attach a slash command to the client
-@client.tree.command()
-async def codenames(interaction: discord.Interaction):
-    """Play a game of Codenames"""
-    game = Codenames()
-    status_view = GameStatusView(game)
-    public_view = PublicBoardView(game, status_view)
-
-    await interaction.response.send_message(content=None, view=public_view)
-    public_view.status_message = await interaction.followup.send(content=status_view.status_message(), view=status_view,
-                                                                 wait=True)
-
-    await interaction.followup.send(content=f'Select player to be RED Spymaster (AI players not yet enabled)',
-                                    ephemeral=False, view=SpymasterSelectView(game, "RED"))
-    await interaction.followup.send(content=f'Select player to be BLUE Spymaster (AI players not yet enabled)',
-                                    ephemeral=False, view=SpymasterSelectView(game, "BLUE"))
-
-
-
-
-# run the client
-client.run(config["TOKEN"])
