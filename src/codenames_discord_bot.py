@@ -199,17 +199,17 @@ class CodenamesClient(discord.Client):
     async def setup_hook(self):
         await self.tree.sync()
 
-
-intents = discord.Intents.default()
-client = CodenamesClient(intents=intents)
-
-
-@client.event
-async def on_ready():
-    print(f'Logged in as {client.user} (ID: {client.user.id})')
-    print('------')
+    async def on_ready(self):
+        print(f'Logged in as {client.user} (ID: {client.user.id})')
+        print('------')
 
 
+
+# create a client instance
+client = CodenamesClient(intents=discord.Intents.default())
+
+
+# attach a slash command to the client
 @client.tree.command()
 async def codenames(interaction: discord.Interaction):
     """Play a game of Codenames"""
@@ -227,4 +227,7 @@ async def codenames(interaction: discord.Interaction):
                                     ephemeral=False, view=SpymasterSelectView(game, "BLUE"))
 
 
+
+
+# run the client
 client.run(config["TOKEN"])
