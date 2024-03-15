@@ -1,12 +1,9 @@
-import asyncio
 import os
 
 import discord
 from discord.ext import commands
-from dotenv import dotenv_values
-
 from discord_bot.codenames_cog import CodenamesCog
-
+from dotenv import dotenv_values
 
 RUN_DIR = os.path.dirname(os.path.dirname(os.getcwd()))
 env = dotenv_values(os.path.join(RUN_DIR, '.env'))
@@ -16,6 +13,7 @@ bot = commands.Bot(
     command_prefix="!"
 )
 
+
 @bot.event
 async def setup_hook() -> None:
     await bot.add_cog(CodenamesCog(bot))
@@ -23,5 +21,3 @@ async def setup_hook() -> None:
 
 
 bot.run(env["TOKEN"])
-
-

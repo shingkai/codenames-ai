@@ -4,8 +4,8 @@ import sys
 from ai_players.multi_arm_guesser import MultiArmGuesser
 from ai_players.multi_arm_spymaster import MultiArmSpy
 from codenames_engine import Codenames
-from models.multi_arm_model import MultiArmModel
 from models.gensim_models import Word2VecModel, FastTextModel
+from models.multi_arm_model import MultiArmModel
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 log = logging.getLogger(__name__)

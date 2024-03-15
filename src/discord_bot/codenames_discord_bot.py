@@ -1,12 +1,13 @@
 import logging
 import os
 from typing import Union, Any
+
 import discord
+from codenames_ai import SpymasterAI, GuesserAI
+from codenames_engine import Codenames, Team, CardColor
 from discord import Interaction
 from discord._types import ClientT
 from dotenv import dotenv_values
-from codenames_engine import Codenames, Team, CardColor
-from codenames_ai import SpymasterAI, GuesserAI
 
 # init logging
 log = logging.getLogger(__name__)
@@ -104,7 +105,8 @@ class SpyMasterAIButton(discord.ui.Button):
         log.debug(f"searching for clues...")
         ai_clues = self.ai_spy.find_clue(self.team)
         log.debug(f"{len(ai_clues)} clues generated")
-        clue_strings = "\n".join([f"{clue} - {100 * score:.2f}% -> {list(targets)}" for (clue, score, targets) in ai_clues])
+        clue_strings = "\n".join(
+            [f"{clue} - {100 * score:.2f}% -> {list(targets)}" for (clue, score, targets) in ai_clues])
         msg = f"{color_emoji(self.team)} AI clue suggestions:```\n{clue_strings}\n```"
         log.debug(msg)
         await interaction.edit_original_response(content=msg, ephemeral=True)
@@ -130,7 +132,6 @@ class GuesserAIModal(discord.ui.Modal, title='AI Guesser'):
         msg = f"AI guess suggestions:```\n{guess_strings}\n```"
         log.debug(msg)
         await interaction.response.send_message(content=msg, ephemeral=True)
-
 
 
 class GuesserAIButton(discord.ui.Button):

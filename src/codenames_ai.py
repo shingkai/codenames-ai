@@ -1,7 +1,9 @@
 import re
 from abc import ABC, abstractmethod
 from typing import Tuple
+
 from gensim.models import KeyedVectors
+
 from codenames_engine import Codenames, Team
 
 
