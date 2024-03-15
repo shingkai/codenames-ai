@@ -7,8 +7,10 @@ from dotenv import dotenv_values
 
 log = logging.getLogger(__name__)
 
-PARENT_DIR = os.path.dirname(os.path.dirname(__file__))
-env = dotenv_values(os.path.join(PARENT_DIR, '.env'))
+abspath = os.path.abspath(__file__)
+pkg_root = os.path.dirname(os.path.dirname(abspath))
+os.chdir(pkg_root)
+env = dotenv_values(os.path.join(pkg_root, '.env'))
 
 WORD_POOL_FILE = env["WORD_POOL_FILE"]
 

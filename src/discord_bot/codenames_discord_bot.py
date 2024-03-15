@@ -68,7 +68,7 @@ class SpymasterSelectView(discord.ui.View):
     """
 
     def __init__(self, game: Codenames, team: Team, ai_spy: SpymasterAI):
-        super().__init__()
+        super().__init__(timeout=None)
         self.game = game
         self.add_item(SpymasterSelect(team, ai_spy))
 
@@ -79,7 +79,7 @@ class SpymasterView(discord.ui.View):
     """
 
     def __init__(self, game: Codenames):
-        super().__init__()
+        super().__init__(timeout=None)
         self.game = game
         cards = self.game.board.hidden_cards()
         for x in range(5):
@@ -89,7 +89,7 @@ class SpymasterView(discord.ui.View):
 
 class SpyMasterAIView(discord.ui.View):
     def __init__(self, team: Team, ai_spy: SpymasterAI):
-        super().__init__()
+        super().__init__(timeout=None)
         self.add_item(SpyMasterAIButton(team, ai_spy))
 
 
@@ -101,7 +101,7 @@ class SpyMasterAIButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         log.info(f"{self.team} team asked ai for clue")
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=True, ephemeral=True)
         log.debug(f"searching for clues...")
         ai_clues = self.ai_spy.find_clue(self.team)
         log.debug(f"{len(ai_clues)} clues generated")
@@ -109,7 +109,7 @@ class SpyMasterAIButton(discord.ui.Button):
             [f"{clue} - {100 * score:.2f}% -> {list(targets)}" for (clue, score, targets) in ai_clues])
         msg = f"{color_emoji(self.team)} AI clue suggestions:```\n{clue_strings}\n```"
         log.debug(msg)
-        await interaction.edit_original_response(content=msg, ephemeral=True)
+        await interaction.edit_original_response(content=msg)
 
 
 class GuesserAIModal(discord.ui.Modal, title='AI Guesser'):
@@ -163,7 +163,7 @@ class GameStatusView(discord.ui.View):
     """
 
     def __init__(self, game: Codenames, ai_guesser: GuesserAI):
-        super().__init__()
+        super().__init__(timeout=None)
         self.game = game
         self.add_item(PassTurnButton())
         self.add_item(GuesserAIButton(ai_guesser))
@@ -238,7 +238,7 @@ class PublicBoardView(discord.ui.View):
     """
 
     def __init__(self, game: Codenames, status_view: GameStatusView):
-        super().__init__()
+        super().__init__(timeout=None)
         self.status_view = status_view
         self.status_message: discord.WebhookMessage
         self.game = game

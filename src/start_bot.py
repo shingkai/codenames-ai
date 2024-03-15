@@ -24,12 +24,12 @@ word2vec_engine = Word2VecModel()
 log.info("loading fasttext...")
 fasttext_engine = FastTextModel()
 
-# multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
-noop_model = MultiArmModel([])
+multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
+# noop_model = MultiArmModel([])
 
 # model = fasttext_engine
-# model = multi_arm_vector_engine
-model = noop_model
+model = multi_arm_vector_engine
+# model = noop_model
 
 # setup discord bot
 intents = discord.Intents.default()
