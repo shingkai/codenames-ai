@@ -28,7 +28,7 @@ class SpymasterAI(ABC):
         self.model = model
 
     @abstractmethod
-    def find_clue(self, team: Team, n=3) -> list[Tuple[str, int]]:
+    def find_clue(self, team: Team, n=3) -> list[Tuple[str, float, list[str]]]:
         pass
 
     @staticmethod
@@ -49,5 +49,5 @@ class GuesserAI:
         self.model = model
 
     @abstractmethod
-    def pick_board_words(self, word: str) -> list[tuple[str, float]]:
+    def find_guess(self, word: str) -> list[tuple[str, float]]:
         pass

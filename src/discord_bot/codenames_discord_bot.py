@@ -1,10 +1,12 @@
 import logging
 import os
-from typing import Union
+from typing import Union, Any
 import discord
-from discord import app_commands
+from discord import Interaction
+from discord._types import ClientT
 from dotenv import dotenv_values
 from codenames_engine import Codenames, Team, CardColor
+from codenames_ai import SpymasterAI, GuesserAI
 
 # init logging
 log = logging.getLogger(__name__)
@@ -34,11 +36,12 @@ class SpymasterSelect(discord.ui.UserSelect):
     TODO: If the Codenames-AI bot is selected, a codenames AI will generate the clues for its respective team
     """
 
-    def __init__(self, team: Team):
+    def __init__(self, team: Team, ai_spy: SpymasterAI):
         super().__init__(
             placeholder=f"Select {color_emoji(team)} {team} Spymaster...",
         )
         self.team = team
+        self.ai_spy = ai_spy
 
     async def callback(self, interaction: discord.Interaction):
         users: list[Union[discord.Member, discord.User]] = self.values
@@ -47,6 +50,9 @@ class SpymasterSelect(discord.ui.UserSelect):
                 dm = await user.create_dm()
                 await dm.send(f"You were selected to be {color_emoji(self.team)} {self.team} Spymaster",
                               view=SpymasterView(self.view.game))
+                dm = await user.create_dm()
+                await dm.send(f"Need help coming up with a clue? Ask the AI Spymaster",
+                              view=SpyMasterAIView(self.team, self.ai_spy))
             else:
                 # TODO: enable spymaster AI if the bot is selected
                 return
@@ -60,10 +66,10 @@ class SpymasterSelectView(discord.ui.View):
     View containing the SpymasterSelect dropdown
     """
 
-    def __init__(self, game: Codenames, team: Team):
+    def __init__(self, game: Codenames, team: Team, ai_spy: SpymasterAI):
         super().__init__()
         self.game = game
-        self.add_item(SpymasterSelect(team))
+        self.add_item(SpymasterSelect(team, ai_spy))
 
 
 class SpymasterView(discord.ui.View):
@@ -78,6 +84,62 @@ class SpymasterView(discord.ui.View):
         for x in range(5):
             for y in range(5):
                 self.add_item(CardButton(x, y, cards[x * 5 + y][0], cards[x * 5 + y][1], True))
+
+
+class SpyMasterAIView(discord.ui.View):
+    def __init__(self, team: Team, ai_spy: SpymasterAI):
+        super().__init__()
+        self.add_item(SpyMasterAIButton(team, ai_spy))
+
+
+class SpyMasterAIButton(discord.ui.Button):
+    def __init__(self, team: Team, ai_spy: SpymasterAI):
+        super().__init__(label=f"{color_emoji(team)} Ask AI")
+        self.team = team
+        self.ai_spy = ai_spy
+
+    async def callback(self, interaction: discord.Interaction):
+        log.info(f"{self.team} team asked ai for clue")
+        await interaction.response.defer(thinking=True)
+        log.debug(f"searching for clues...")
+        ai_clues = self.ai_spy.find_clue(self.team)
+        log.debug(f"{len(ai_clues)} clues generated")
+        clue_strings = "\n".join([f"{clue} - {100 * score:.2f}% -> {list(targets)}" for (clue, score, targets) in ai_clues])
+        msg = f"{color_emoji(self.team)} AI clue suggestions:```\n{clue_strings}\n```"
+        log.debug(msg)
+        await interaction.edit_original_response(content=msg, ephemeral=True)
+
+
+class GuesserAIModal(discord.ui.Modal, title='AI Guesser'):
+    def __init__(self, ai_guesser: GuesserAI):
+        super().__init__()
+        self.ai_guesser = ai_guesser
+
+    clue = discord.ui.TextInput(
+        label=f"Ask AI",
+        placeholder="clue word..."
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        log.info(f"players asked ai for a guess")
+        # await interaction.response.defer(thinking=True)
+        log.debug(f"searching for guesses for clue {self.clue.value}...")
+        ai_guesses = self.ai_guesser.find_guess(self.clue.value.lower())
+        log.debug(f"{len(ai_guesses)} guesses generated")
+        guess_strings = "\n".join([f"{self.clue.value} -> {guess} {100 * score:.2f}%" for (guess, score) in ai_guesses])
+        msg = f"AI guess suggestions:```\n{guess_strings}\n```"
+        log.debug(msg)
+        await interaction.response.send_message(content=msg, ephemeral=True)
+
+
+
+class GuesserAIButton(discord.ui.Button):
+    def __init__(self, ai_guesser: GuesserAI):
+        super().__init__(label="Ask AI Guesser")
+        self.ai_guesser = ai_guesser
+
+    async def callback(self, interaction: Interaction[ClientT]) -> Any:
+        await interaction.response.send_modal(GuesserAIModal(self.ai_guesser))
 
 
 class PassTurnButton(discord.ui.Button):
@@ -99,10 +161,11 @@ class GameStatusView(discord.ui.View):
     Also contains the PassTurnButton, which cannot be in the main PublicBoardView as there is a limit to 25 items per view.
     """
 
-    def __init__(self, game: Codenames):
+    def __init__(self, game: Codenames, ai_guesser: GuesserAI):
         super().__init__()
         self.game = game
         self.add_item(PassTurnButton())
+        self.add_item(GuesserAIButton(ai_guesser))
 
     def status_message(self) -> str:
         winner = self.game.winner()
@@ -187,5 +250,3 @@ class PublicBoardView(discord.ui.View):
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
-
-

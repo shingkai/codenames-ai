@@ -27,13 +27,20 @@ spy = MultiArmSpy(codenames, multi_arm_vector_engine)
 guesser = MultiArmGuesser(codenames, multi_arm_vector_engine)
 
 # begin playing
+# find clues
 log.info("finding clues")
 ai_clues = spy.find_clue("RED", n=10)
 log.info(ai_clues)
-
-clue = ai_clues[0][1]
-targets = ai_clues[0][0]
+clue = ai_clues[0][0]
+targets = ai_clues[0][2]
 log.info(f"giving clue: '{clue} {len(targets)}'")
 
-ai_guess = guesser.pick_board_words(clue)
+# find guesses
+log.info(f"finding guesses")
+ai_guess = guesser.find_guess(clue)
 log.info(ai_guess)
+
+# make a guess and update the game state
+guess = ai_guess[0][0]  # guess the first result
+log.info(f"guessing {guess}")
+codenames.guess(guess.upper())
