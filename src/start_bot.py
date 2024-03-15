@@ -2,9 +2,9 @@ import logging
 import os
 import sys
 
-from dotenv import dotenv_values
 import discord
 from discord.ext import commands
+from dotenv import dotenv_values
 
 from discord_bot.codenames_cog import CodenamesCog
 from models.gensim_models import Word2VecModel, FastTextModel

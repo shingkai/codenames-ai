@@ -3,11 +3,12 @@ import os
 from typing import Union, Any
 
 import discord
-from codenames_ai import SpymasterAI, GuesserAI
-from codenames_engine import Codenames, Team, CardColor
 from discord import Interaction
 from discord._types import ClientT
 from dotenv import dotenv_values
+
+from codenames_ai import SpymasterAI, GuesserAI
+from codenames_engine import Codenames, Team, CardColor
 
 # init logging
 log = logging.getLogger(__name__)

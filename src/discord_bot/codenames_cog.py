@@ -1,11 +1,12 @@
 import logging
 
 import discord
+from discord import app_commands
+from discord.ext import commands
+
 from ai_players import MultiArmSpy, MultiArmGuesser
 from codenames_ai import EmbeddingsModel
 from codenames_engine import Codenames
-from discord import app_commands
-from discord.ext import commands
 from discord_bot.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView
 
 log = logging.getLogger(__name__)

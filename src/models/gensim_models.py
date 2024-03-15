@@ -1,5 +1,6 @@
-import gensim.downloader as gs_api
 from typing import Tuple
+
+import gensim.downloader as gs_api
 
 from codenames_ai import EmbeddingsModel
 
