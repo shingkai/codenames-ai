@@ -31,6 +31,29 @@ def color_emoji(color: CardColor) -> str:
         return "⬛"
 
 
+class SpymasterView(discord.ui.View):
+    """
+    View containing the board with colors revealed (for spymaster eyes only)
+    """
+
+    def __init__(self, game: Codenames):
+        super().__init__(timeout=None)
+        self.game = game
+        self.spy_view_dms = []
+        cards = self.game.board.hidden_cards()
+        for x in range(5):
+            for y in range(5):
+                self.add_item(CardButton(x, y, cards[x * 5 + y][0], cards[x * 5 + y][1], True))
+
+    async def cross_out_word(self, word: str):
+        for item in self.children:
+            if isinstance(item, discord.ui.Button):
+                if item.label == word.upper() or item.label == "🥷 " + word.upper():
+                    item.label = '\u0336'.join(item.label) + '\u0336'
+        for dm in self.spy_view_dms:
+            await dm.edit(content=dm.content, view=self)
+
+
 class SpymasterSelect(discord.ui.UserSelect):
     """
     Defines a dropdown menu with a list of server members to choose from. Sends a dm to the selected user with the revealed board
@@ -38,23 +61,26 @@ class SpymasterSelect(discord.ui.UserSelect):
     TODO: If the Codenames-AI bot is selected, a codenames AI will generate the clues for its respective team
     """
 
-    def __init__(self, team: Team, ai_spy: SpymasterAI):
+    def __init__(self, team: Team, ai_spy: SpymasterAI, spy_view: SpymasterView):
         super().__init__(
             placeholder=f"Select {color_emoji(team)} {team} Spymaster...",
         )
         self.team = team
         self.ai_spy = ai_spy
+        self.spy_view = spy_view
 
     async def callback(self, interaction: discord.Interaction):
         users: list[Union[discord.Member, discord.User]] = self.values
         for user in users:
             if user.bot is not True:
-                dm = await user.create_dm()
-                await dm.send(f"You were selected to be {color_emoji(self.team)} {self.team} Spymaster",
-                              view=SpymasterView(self.view.game))
-                dm = await user.create_dm()
-                await dm.send(f"Need help coming up with a clue? Ask the AI Spymaster",
-                              view=SpyMasterAIView(self.team, self.ai_spy))
+                spy_view_dm = await user.create_dm()
+                spy_view_dm_msg = await spy_view_dm.send(
+                    f"You were selected to be {color_emoji(self.team)} {self.team} Spymaster",
+                    view=self.spy_view)
+                self.spy_view.spy_view_dms.append(spy_view_dm_msg)
+                spy_ai_dm = await user.create_dm()
+                await spy_ai_dm.send(f"Need help coming up with a clue? Ask the AI Spymaster",
+                                     view=SpyMasterAIView(self.team, self.ai_spy))
             else:
                 # TODO: enable spymaster AI if the bot is selected
                 return
@@ -68,24 +94,10 @@ class SpymasterSelectView(discord.ui.View):
     View containing the SpymasterSelect dropdown
     """
 
-    def __init__(self, game: Codenames, team: Team, ai_spy: SpymasterAI):
+    def __init__(self, game: Codenames, spy_view: SpymasterView, team: Team, ai_spy: SpymasterAI):
         super().__init__(timeout=None)
         self.game = game
-        self.add_item(SpymasterSelect(team, ai_spy))
-
-
-class SpymasterView(discord.ui.View):
-    """
-    View containing the board with colors revealed (for spymaster eyes only)
-    """
-
-    def __init__(self, game: Codenames):
-        super().__init__(timeout=None)
-        self.game = game
-        cards = self.game.board.hidden_cards()
-        for x in range(5):
-            for y in range(5):
-                self.add_item(CardButton(x, y, cards[x * 5 + y][0], cards[x * 5 + y][1], True))
+        self.add_item(SpymasterSelect(team, ai_spy, spy_view))
 
 
 class SpyMasterAIView(discord.ui.View):
@@ -205,16 +217,19 @@ class CardButton(discord.ui.Button):
         color = self.view.game.guess(self.label)
         if color is None:
             return
+        msg = f"{color_emoji(prev_turn)} {prev_turn} team guessed {self.label}, which was {color_emoji(color)} {color}"
         self.style = CardButton.color_to_style(color)
         self.disabled = True
+        # also cross out the corresponding card in the spymaster view
+        if isinstance(self.view, PublicBoardView):
+            await self.view.spymaster_view.cross_out_word(self.label)
+        self.label = '\u0336'.join(self.label) + '\u0336'
         if color == "BLACK":
             self.label = "🥷 " + self.label
         if self.view.game.winner() is not None:
             self.view.disable_board()
             self.view.status_view.disable_pass_button()
-        await interaction.response.edit_message(
-            content=f"{color_emoji(prev_turn)} {prev_turn} team guessed {self.label}, which was {color_emoji(color)} {color}",
-            view=self.view)
+        await interaction.response.edit_message(content=msg, view=self.view)
         await self.view.status_message.edit(content=self.view.status_view.status_message(), view=self.view.status_view)
 
     @staticmethod
@@ -243,6 +258,7 @@ class PublicBoardView(discord.ui.View):
         self.status_view = status_view
         self.status_message: discord.WebhookMessage
         self.game = game
+        self.spymaster_view = None
         cards = self.game.board.public_cards()
         for x in range(5):
             for y in range(5):

@@ -7,7 +7,7 @@ from discord.ext import commands
 from ai_players import MultiArmSpy, MultiArmGuesser
 from codenames_ai import EmbeddingsModel
 from codenames_engine import Codenames
-from discord_bot.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView
+from discord_bot.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,13 @@ class CodenamesCog(commands.Cog):
                                                                      view=status_view,
                                                                      wait=True)
 
+        spymaster_view = SpymasterView(game)
+
+        red_spy_select_view = SpymasterSelectView(game, spymaster_view, "RED", ai_spy)
         await interaction.followup.send(content=f'Select player to be RED Spymaster (AI players not yet enabled)',
-                                        ephemeral=False, view=SpymasterSelectView(game, "RED", ai_spy))
+                                        ephemeral=False, view=red_spy_select_view)
+        blue_spy_select_view = SpymasterSelectView(game, spymaster_view, "BLUE", ai_spy)
         await interaction.followup.send(content=f'Select player to be BLUE Spymaster (AI players not yet enabled)',
-                                        ephemeral=False, view=SpymasterSelectView(game, "BLUE", ai_spy))
+                                        ephemeral=False, view=blue_spy_select_view)
+
+        public_view.spymaster_view = spymaster_view
