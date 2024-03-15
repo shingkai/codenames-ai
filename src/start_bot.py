@@ -13,8 +13,10 @@ from models.multi_arm_model import MultiArmModel
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-RUN_DIR = os.path.dirname(os.getcwd())
-env = dotenv_values(os.path.join(RUN_DIR, '.env'))
+abspath = os.path.abspath(__file__)
+pkg_root = os.path.dirname(os.path.dirname(abspath))
+os.chdir(pkg_root)
+env = dotenv_values(os.path.join(pkg_root, '.env'))
 
 # load word embedding models
 log.info("loading word2vec...")
@@ -22,12 +24,12 @@ word2vec_engine = Word2VecModel()
 log.info("loading fasttext...")
 fasttext_engine = FastTextModel()
 
-multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
-# noop_model = MultiArmModel([])
+# multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
+noop_model = MultiArmModel([])
 
 # model = fasttext_engine
-model = multi_arm_vector_engine
-# model = noop_model
+# model = multi_arm_vector_engine
+model = noop_model
 
 # setup discord bot
 intents = discord.Intents.default()
