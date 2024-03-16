@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from dotenv import dotenv_values
 
-from discord_bot.codenames_cog import CodenamesCog
+from app.codenames_cog import CodenamesCog
 from models.gensim_models import Word2VecModel, FastTextModel
 from models.multi_arm_model import MultiArmModel
 

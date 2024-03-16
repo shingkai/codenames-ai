@@ -1,8 +1,8 @@
 import logging
 import sys
 
-from ai_players.multi_arm_guesser import MultiArmGuesser
-from ai_players.multi_arm_spymaster import MultiArmSpy
+from ai.embeddings_guesser import EmbeddingsGuesser
+from ai.embeddings_spymaster import EmbeddingsSpy
 from codenames_engine import Codenames
 from models.gensim_models import Word2VecModel, FastTextModel
 from models.multi_arm_model import MultiArmModel
@@ -21,10 +21,10 @@ fasttext_engine = FastTextModel()
 multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
 
 # create ai spymaster
-spy = MultiArmSpy(codenames, multi_arm_vector_engine)
+spy = EmbeddingsSpy(codenames, multi_arm_vector_engine)
 
 # create ai guesser
-guesser = MultiArmGuesser(codenames, multi_arm_vector_engine)
+guesser = EmbeddingsGuesser(codenames, multi_arm_vector_engine)
 
 # begin playing
 # find clues

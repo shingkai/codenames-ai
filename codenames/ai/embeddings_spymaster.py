@@ -1,11 +1,11 @@
 from itertools import combinations
 from typing import Tuple
 
-from codenames_ai import SpymasterAI
-from codenames_engine import Team
+from codenames.codenames_ai import SpymasterAI
+from codenames.codenames_engine import Team
 
 
-class MultiArmSpy(SpymasterAI):
+class EmbeddingsSpy(SpymasterAI):
 
     def find_clue(self, team: Team, n=3) -> list[Tuple[str, float, list[str]]]:
         cards = self.game.board.hidden_cards()
@@ -20,18 +20,16 @@ class MultiArmSpy(SpymasterAI):
 
         clues: list[Tuple[str, float, list[str]]] = []
         for targets in target_groups:
-            candidates = self.model.find_candidates(list(targets), avoid_cards)
+            candidates = self.model.find_centroid_word(list(targets), avoid_cards)
             valid_clues = list(filter(lambda clue: SpymasterAI.is_valid_clue(clue[0], card_words), candidates))
             clues.extend([(result[0], result[1], targets) for result in valid_clues])
 
         return self.rank_clues(clues)[:n]
 
-    @staticmethod
-    def weighted_score(score: int, count: int) -> float:
-        return score * (1 + 0.1 * count)
+    def _initial_clues(self, team: Team, n=3) -> list[Tuple[str, float, list[str]]]:
+        pass
 
-    @staticmethod
-    def rank_clues(clues: list[Tuple[str, float, list[str]]]) -> list[Tuple[str, float, list[str]]]:
-        weighted_clues = [(word, MultiArmSpy.weighted_score(score, len(targets)), targets) for (word, score, targets) in
-                          clues]
-        return sorted(weighted_clues, key=lambda x: x[1], reverse=True)
+    def _pre_guess_clue(self, clue: str, targets: list[str]) -> list[tuple[str, float]]:
+        hits = self.model.find_most_similar_from_list(clue, targets, n=3)
+        matches = [(hit, score) for (hit, score) in hits if hit in targets]
+        return matches

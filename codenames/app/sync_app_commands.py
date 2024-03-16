@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from dotenv import dotenv_values
 
-from discord_bot.codenames_cog import CodenamesCog
+from app.codenames_cog import CodenamesCog
 
 RUN_DIR = os.path.dirname(os.path.dirname(os.getcwd()))
 env = dotenv_values(os.path.join(RUN_DIR, '.env'))

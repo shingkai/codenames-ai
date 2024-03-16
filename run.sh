@@ -1,6 +1,6 @@
 #!/bin/sh
 
 CURRENT_DIR=$(pwd)
-export PYTHONPATH="$CURRENT_DIR:$CURRENT_DIR/src"
+export PYTHONPATH="$CURRENT_DIR:$CURRENT_DIR/codenames_ai/"
 
-python3 src/start_bot.py
+python3 codenames/start_bot.py

@@ -2,14 +2,12 @@ import logging
 import os
 import random
 from typing import Literal, Optional, Tuple
-
 from dotenv import dotenv_values
 
 log = logging.getLogger(__name__)
 
 abspath = os.path.abspath(__file__)
 pkg_root = os.path.dirname(os.path.dirname(abspath))
-os.chdir(pkg_root)
 env = dotenv_values(os.path.join(pkg_root, '.env'))
 
 WORD_POOL_FILE = env["WORD_POOL_FILE"]

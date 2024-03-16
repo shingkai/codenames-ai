@@ -2,7 +2,7 @@ from typing import Tuple
 
 import gensim.downloader as gs_api
 
-from codenames_ai import EmbeddingsModel
+from codenames.codenames_ai import EmbeddingsModel
 
 
 class GensimModel(EmbeddingsModel):
@@ -10,10 +10,10 @@ class GensimModel(EmbeddingsModel):
         super().__init__()
         self.model = gs_api.load(model_name)
 
-    def find_candidates(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[Tuple[str, float]]:
+    def find_centroid_word(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[Tuple[str, float]]:
         return self.model.most_similar(positive=target_cards, negative=avoid_cards, topn=n)
 
-    def guess_word(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
+    def find_most_similar_from_list(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
         guess = self.model.most_similar_to_given(clue, words)
         similarity = self.model.similarity(clue, guess)
         return [(guess, similarity)][:n]

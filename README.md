@@ -15,7 +15,7 @@ _An implementation of the game Codenames in a Discord UI, with multiple AI playe
 
 ## Using the AI-Spymaster and AI-Guesser directly
 ### Examples
-- [demo.py](src/demo.py) - python script that creates a game, prepares embedding models,
+- [demo.py](codenames/demo.py) - python script that creates a game, prepares embedding models,
 creates ai-spymaster and ai-guesser players, and generates glues and hints. game.
 - [notebooks/](notebooks/) - jupyter notebooks that were used to as scratchpads while developing python. _not guaranteed to still run properly._
 

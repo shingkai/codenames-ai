@@ -12,11 +12,11 @@ class EmbeddingsModel(ABC):
         self.model: KeyedVectors
 
     @abstractmethod
-    def find_candidates(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[Tuple[str, float]]:
+    def find_centroid_word(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[Tuple[str, float]]:
         pass
 
     @abstractmethod
-    def guess_word(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
+    def find_most_similar_from_list(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
         pass
 
 
@@ -43,6 +43,16 @@ class SpymasterAI(ABC):
             if clue in word or word in clue:
                 return False
         return True
+
+    @staticmethod
+    def weighted_score(score: int, count: int) -> float:
+        return score * (1 + 0.0 * count)
+
+    @staticmethod
+    def rank_clues(clues: list[Tuple[str, float, list[str]]]) -> list[Tuple[str, float, list[str]]]:
+        weighted_clues = [(word, SpymasterAI.weighted_score(score, len(targets)), targets) for (word, score, targets) in
+                          clues]
+        return sorted(weighted_clues, key=lambda x: x[1], reverse=True)
 
 
 class GuesserAI:

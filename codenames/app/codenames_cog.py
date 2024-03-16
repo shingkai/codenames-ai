@@ -4,10 +4,12 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from ai_players import MultiArmSpy, MultiArmGuesser
-from codenames_ai import EmbeddingsModel
-from codenames_engine import Codenames
-from discord_bot.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
+from codenames.codenames_ai import EmbeddingsModel
+from codenames.codenames_engine import Codenames
+from codenames.app.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
+from codenames.ai.embeddings_spymaster import EmbeddingsSpy
+from codenames.ai.embeddings_guesser import EmbeddingsGuesser
+
 
 log = logging.getLogger(__name__)
 
@@ -29,8 +31,8 @@ class CodenamesCog(commands.Cog):
         game = Codenames()
 
         log.info('creating ai spy and guesser...')
-        ai_spy = MultiArmSpy(game, self.model)
-        ai_guesser = MultiArmGuesser(game, self.model)
+        ai_spy = EmbeddingsSpy(game, self.model)
+        ai_guesser = EmbeddingsGuesser(game, self.model)
 
         status_view = GameStatusView(game, ai_guesser)
         public_view = PublicBoardView(game, status_view)
