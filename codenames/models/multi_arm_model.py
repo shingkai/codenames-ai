@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from codenames.codenames_ai import EmbeddingsModel
 
 
@@ -9,7 +7,7 @@ class MultiArmModel(EmbeddingsModel):
         super().__init__()
         self.models = models
 
-    def find_centroid_word(self, targets: list[str], avoids: list[str], n=10) -> list[Tuple[str, float]]:
+    def find_centroid_word(self, targets: list[str], avoids: list[str], n=10) -> list[tuple[str, float]]:
         candidates = []
         for child_model in self.models:
             candidates.extend(child_model.find_centroid_word(targets, avoids, n))

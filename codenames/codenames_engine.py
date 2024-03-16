@@ -1,7 +1,7 @@
 import logging
 import os
 import random
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional
 from dotenv import dotenv_values
 
 log = logging.getLogger(__name__)
@@ -99,10 +99,10 @@ class Board:
         self.cards = self.red + self.blue + self.grey + self.black
         random.shuffle(self.cards)
 
-    def public_cards(self) -> list[Tuple[str, Optional[CardColor]]]:
+    def public_cards(self) -> list[tuple[str, Optional[CardColor]]]:
         return [(card.word, card.revealed) for card in self.cards]
 
-    def hidden_cards(self) -> list[Tuple[str, CardColor, Optional[CardColor]]]:
+    def hidden_cards(self) -> list[tuple[str, CardColor, Optional[CardColor]]]:
         return [(card.word, card.color, card.revealed) for card in self.cards]
 
     def reveal(self, word) -> Optional[Card]:
