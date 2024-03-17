@@ -19,6 +19,7 @@ CardColor = Literal["RED", "BLUE", "GREY", "BLACK"]
 class Codenames:
     def __init__(self):
         self.board = Board()
+        log.debug(f"{self.board.hidden_cards()}")
         self.turn: Team = "RED"
         self.remaining = {"RED": 9, "BLUE": 8}
         self.assassinated: Optional[Team] = None
@@ -81,6 +82,9 @@ class Card:
     def __str__(self):
         return f"{self.word} ({self.color}, revealed={self.revealed})"
 
+    def public_view(self):
+        return self.word, self.revealed
+
     def reveal(self):
         self.revealed = self.color
 
@@ -96,7 +100,7 @@ class Board:
         self.grey = [Card(word, "GREY") for word in self.words[17:24]]
         self.black = [Card(word, "BLACK") for word in self.words[24:]]
 
-        self.cards = self.red + self.blue + self.grey + self.black
+        self.cards: list[Card] = self.red + self.blue + self.grey + self.black
         random.shuffle(self.cards)
 
     def public_cards(self) -> list[tuple[str, Optional[CardColor]]]:
@@ -104,6 +108,9 @@ class Board:
 
     def hidden_cards(self) -> list[tuple[str, CardColor, Optional[CardColor]]]:
         return [(card.word, card.color, card.revealed) for card in self.cards]
+
+    def card_color_map(self) -> dict[str, CardColor]:
+        return {card.word: card.color for card in self.cards}
 
     def reveal(self, word) -> Optional[Card]:
         for card in self.cards:

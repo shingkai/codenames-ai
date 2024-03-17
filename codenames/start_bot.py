@@ -19,16 +19,16 @@ os.chdir(pkg_root)
 env = dotenv_values(os.path.join(pkg_root, '.env'))
 
 # load word embedding models
-log.info("loading word2vec...")
-word2vec_engine = Word2VecModel()
+# log.info("loading word2vec...")
+# word2vec_engine = Word2VecModel()
 log.info("loading fasttext...")
 fasttext_engine = FastTextModel()
 
-multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
+# multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
 # noop_model = MultiArmModel([])
 
-# model = fasttext_engine
-model = multi_arm_vector_engine
+model = fasttext_engine
+# model = multi_arm_vector_engine
 # model = noop_model
 
 # setup discord bot

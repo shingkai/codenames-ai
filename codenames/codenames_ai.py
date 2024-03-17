@@ -29,7 +29,7 @@ class SpymasterAI(ABC):
         self.model = model
 
     @abstractmethod
-    def find_clue(self, team: Team, n=3) -> list[tuple[str, float, list[str]]]:
+    def find_clue(self, team: Team, n=3) -> list[tuple[str, int, float, list[str]]]:
         pass
 
     @staticmethod

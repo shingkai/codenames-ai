@@ -119,7 +119,7 @@ class SpyMasterAIButton(discord.ui.Button):
         ai_clues = self.ai_spy.find_clue(self.team)
         log.debug(f"{len(ai_clues)} clues generated")
         clue_strings = "\n".join(
-            [f"{clue} - {100 * score:.2f}% -> {list(targets)}" for (clue, score, targets) in ai_clues])
+            [f"'{clue} : {count}' -> {score:.2f} pts -> {list(targets)}" for (clue, count, score, targets) in ai_clues])
         msg = f"{color_emoji(self.team)} AI clue suggestions:```\n{clue_strings}\n```"
         log.debug(msg)
         await interaction.edit_original_response(content=msg)

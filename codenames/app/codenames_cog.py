@@ -31,8 +31,8 @@ class CodenamesCog(commands.Cog):
         game = Codenames()
 
         log.info('creating ai spy and guesser...')
-        ai_spy = EmbeddingsSpy(game, self.model)
         ai_guesser = EmbeddingsGuesser(game, self.model)
+        ai_spy = EmbeddingsSpy(game, self.model, ai_guesser)
 
         status_view = GameStatusView(game, ai_guesser)
         public_view = PublicBoardView(game, status_view)
