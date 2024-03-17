@@ -20,7 +20,11 @@ class EmbeddingsSpy(SpymasterAI):
         log.debug(f"initial candidate clues:\n{clue_string}")
         scored_clues: list[tuple[str, int, float, list[str]]] = []
         public_words = self.game.public_words()
+        guessed = []
         for (clue, score, targets) in initial_clues:
+            if clue in guessed:
+                continue
+            guessed.append(clue)
             guesses = self._pre_guess_clue(clue, public_words, targets, n)
             (count, score, hits) = self._score_guesses(team, guesses)
             scored_clues.append((clue, count, score, hits))
@@ -64,7 +68,6 @@ class EmbeddingsSpy(SpymasterAI):
         hits = []
         for (guess, weight) in guesses:
             log.debug(f"testing guess: {guess} ({weight})")
-            log.debug(f"{self.game.board.card_color_map()[guess.upper()]}")
             if self.game.board.card_color_map()[guess.upper()] == team:
                 log.debug(f"{guess} was matching color {self.game.board.card_color_map()[guess.upper()]}")
                 score += weight
@@ -72,6 +75,7 @@ class EmbeddingsSpy(SpymasterAI):
                 hits.append(guess)
             else:
                 log.debug(f"{guess} was non-matching color {self.game.board.card_color_map()[guess.upper()]}")
+                log.debug(f"first {count} guesses ({hits}) correct, expected score: {score}")
                 return count, score, hits
         log.debug(f"first {count} guesses ({hits}) correct, expected score: {score}")
         return count, score, hits
