@@ -2,7 +2,7 @@ import copy
 
 import gensim.downloader as gs_api
 
-from codenames.codenames_ai import EmbeddingsModel
+from embeddings_model import EmbeddingsModel
 
 
 class GensimModel(EmbeddingsModel):

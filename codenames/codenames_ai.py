@@ -4,24 +4,13 @@ from abc import ABC, abstractmethod
 from codenames_engine import Codenames, Team
 
 
-class EmbeddingsModel(ABC):
-    @abstractmethod
-    def find_centroid_word(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[tuple[str, float]]:
-        pass
-
-    @abstractmethod
-    def find_most_similar_from_list(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
-        pass
-
-
 class SpymasterAI(ABC):
     """
     An AI Spymaster player.
     """
 
-    def __init__(self, game: Codenames, model: EmbeddingsModel):
+    def __init__(self, game: Codenames):
         self.game = game
-        self.model = model
 
     @abstractmethod
     def find_clue(self, team: Team, n=3) -> list[tuple[str, int, float, list[str]]]:
@@ -50,9 +39,8 @@ class SpymasterAI(ABC):
 
 
 class GuesserAI:
-    def __init__(self, game: Codenames, model: EmbeddingsModel):
+    def __init__(self, game: Codenames):
         self.game = game
-        self.model = model
 
     @abstractmethod
     def find_guess(self, word: str, count: int) -> list[tuple[str, float]]:

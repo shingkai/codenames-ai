@@ -1,4 +1,4 @@
-from codenames.codenames_ai import EmbeddingsModel
+from embeddings_model import EmbeddingsModel
 
 
 class MultiArmModel(EmbeddingsModel):

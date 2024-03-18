@@ -7,8 +7,8 @@ from discord.ext import commands
 from codenames.ai.embeddings_guesser import EmbeddingsGuesser
 from codenames.ai.embeddings_spymaster import EmbeddingsSpy
 from codenames.app.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
-from codenames.codenames_ai import EmbeddingsModel
 from codenames.codenames_engine import Codenames
+from embeddings_model import EmbeddingsModel
 
 log = logging.getLogger(__name__)
 
