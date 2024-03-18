@@ -69,8 +69,8 @@ class EmbeddingsSpy(SpymasterAI):
         hits = []
         for (guess, weight) in guesses:
             log.debug(f"testing guess: {guess} ({weight})")
-            if self.game.board.card_color_map()[guess.upper()] == team:
-                log.debug(f"{guess} was matching color {self.game.board.card_color_map()[guess.upper()]}")
+            if self.game.board.get_word_color(guess.upper()) == team:
+                log.debug(f"{guess} was matching color {self.game.board.get_word_color(guess.upper())}")
                 if weight > threshold:
                     score += weight
                     count += 1
@@ -78,7 +78,7 @@ class EmbeddingsSpy(SpymasterAI):
                 else:
                     log.debug(f"confidence: {weight:2f} was too low, skipping")
             else:
-                log.debug(f"{guess} was non-matching color {self.game.board.card_color_map()[guess.upper()]}")
+                log.debug(f"{guess} was non-matching color {self.game.board.get_word_color(guess.upper())}")
                 log.debug(f"first {count} guesses ({hits}) correct, expected score: {score}")
                 return count, score, hits
         log.debug(f"first {count} guesses ({hits}) correct, expected score: {score}")

@@ -17,9 +17,65 @@ Team = Literal["RED", "BLUE"]
 CardColor = Literal["RED", "BLUE", "GREY", "BLACK"]
 
 
+class Card:
+    def __init__(self, word: str, color: CardColor, revealed: Optional[CardColor] = None):
+        self.word: str = word
+        self.color: CardColor = color
+        self.revealed: Optional[CardColor] = revealed
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"{self.word} ({self.color}, revealed={self.revealed})"
+
+    def public_view(self) -> tuple[str, Optional[CardColor]]:
+        return self.word, self.revealed
+
+    def reveal(self):
+        self.revealed = self.color
+
+
+class Board:
+    def __init__(self, word_file=WORD_POOL_FILE, words: Optional[list[str]] = None):
+        if words is not None:
+            self.words = words
+        else:
+            with open(word_file) as f:
+                word_pool = f.read().splitlines()
+            self.words = random.sample(word_pool, k=25)
+
+        self.red = [Card(word, "RED") for word in self.words[0:9]]
+        self.blue = [Card(word, "BLUE") for word in self.words[9:17]]
+        self.grey = [Card(word, "GREY") for word in self.words[17:24]]
+        self.black = [Card(word, "BLACK") for word in self.words[24:]]
+
+        self.cards: list[Card] = self.red + self.blue + self.grey + self.black
+        random.shuffle(self.cards)
+
+    def public_cards(self) -> list[tuple[str, Optional[CardColor]]]:
+        return [(card.word, card.revealed) for card in self.cards]
+
+    def hidden_cards(self) -> list[tuple[str, CardColor, Optional[CardColor]]]:
+        return [(card.word, card.color, card.revealed) for card in self.cards]
+
+    def get_word_color(self, word: str) -> CardColor:
+        return self._card_color_map()[word]
+
+    def _card_color_map(self) -> dict[str, CardColor]:
+        return {card.word: card.color for card in self.cards}
+
+    def reveal(self, word) -> Optional[Card]:
+        for card in self.cards:
+            if card.word == word and card.revealed is None:
+                card.reveal()
+                return card
+        return None
+
+
 class Codenames:
-    def __init__(self):
-        self.board = Board()
+    def __init__(self, board: Optional[Board] = None):
+        self.board: Board = Board() if board is None else board
         log.debug(f"{self.board.hidden_cards()}")
         self.turn: Team = "RED"
         self.remaining = {"RED": 9, "BLUE": 8}
@@ -69,53 +125,3 @@ class Codenames:
             return "BLUE"
         if color == "BLUE":
             return "RED"
-
-
-class Card:
-    def __init__(self, word: str, color: CardColor, revealed: Optional[CardColor] = None):
-        self.word = word
-        self.color = color
-        self.revealed = revealed
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return f"{self.word} ({self.color}, revealed={self.revealed})"
-
-    def public_view(self):
-        return self.word, self.revealed
-
-    def reveal(self):
-        self.revealed = self.color
-
-
-class Board:
-    def __init__(self, word_file=WORD_POOL_FILE):
-        with open(word_file) as f:
-            word_pool = f.read().splitlines()
-        self.words = random.sample(word_pool, k=25)
-
-        self.red = [Card(word, "RED") for word in self.words[0:9]]
-        self.blue = [Card(word, "BLUE") for word in self.words[9:17]]
-        self.grey = [Card(word, "GREY") for word in self.words[17:24]]
-        self.black = [Card(word, "BLACK") for word in self.words[24:]]
-
-        self.cards: list[Card] = self.red + self.blue + self.grey + self.black
-        random.shuffle(self.cards)
-
-    def public_cards(self) -> list[tuple[str, Optional[CardColor]]]:
-        return [(card.word, card.revealed) for card in self.cards]
-
-    def hidden_cards(self) -> list[tuple[str, CardColor, Optional[CardColor]]]:
-        return [(card.word, card.color, card.revealed) for card in self.cards]
-
-    def card_color_map(self) -> dict[str, CardColor]:
-        return {card.word: card.color for card in self.cards}
-
-    def reveal(self, word) -> Optional[Card]:
-        for card in self.cards:
-            if card.word == word and card.revealed is None:
-                card.reveal()
-                return card
-        return None
