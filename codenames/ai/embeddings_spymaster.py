@@ -26,7 +26,7 @@ class EmbeddingsSpy(SpymasterAI):
                 continue
             guessed.append(clue)
             guesses = self._pre_guess_clue(clue, public_words, targets, n)
-            (count, score, hits) = self._score_guesses(team, guesses)
+            (count, score, hits) = self._score_guesses(team, guesses, threshold=0.3)
             scored_clues.append((clue, count, score, hits))
 
         return sorted(scored_clues, key=lambda x: x[2], reverse=True)[:n]
@@ -50,10 +50,10 @@ class EmbeddingsSpy(SpymasterAI):
 
         return self.rank_clues(clues)[:n]
 
-    def _pre_guess_clue(self, clue: str, word_set: list[str], targets: list[str],  n: int = 3) -> list[tuple[str, float]]:
-        log.debug(f"pre-guessing {clue.upper()} for targets {[target.upper() for target in targets]} among word set: {word_set}")
+    def _pre_guess_clue(self, clue: str, words: list[str], targets: list[str], n: int = 3) -> list[tuple[str, float]]:
+        log.debug(f"evaluating candidate clue: {clue} for targets: {targets} among word set: {words}")
         try:
-            hits = self.model.find_most_similar_from_list(clue.upper(), word_set, n)
+            hits = self.model.find_most_similar_from_list(clue.lower(), [word.lower() for word in words], n)
             # matches = [(hit, score) for (hit, score) in hits if hit in word_set]
             # return sorted(hits, key=lambda x: x[1], reverse=True)
             log.debug(f"pre-guessing results: {hits}")
@@ -62,7 +62,8 @@ class EmbeddingsSpy(SpymasterAI):
             log.warning(f"error while finding most similar: {e}")
             return []
 
-    def _score_guesses(self, team: Team, guesses: list[tuple[str, float]]) -> tuple[int, float, list[str]]:
+    def _score_guesses(self, team: Team, guesses: list[tuple[str, float]], threshold: float = 0.5) -> tuple[
+            int, float, list[str]]:
         count = 0
         score = 0.0
         hits = []
@@ -70,9 +71,12 @@ class EmbeddingsSpy(SpymasterAI):
             log.debug(f"testing guess: {guess} ({weight})")
             if self.game.board.card_color_map()[guess.upper()] == team:
                 log.debug(f"{guess} was matching color {self.game.board.card_color_map()[guess.upper()]}")
-                score += weight
-                count += 1
-                hits.append(guess)
+                if weight > threshold:
+                    score += weight
+                    count += 1
+                    hits.append(guess)
+                else:
+                    log.debug(f"confidence: {weight:2f} was too low, skipping")
             else:
                 log.debug(f"{guess} was non-matching color {self.game.board.card_color_map()[guess.upper()]}")
                 log.debug(f"first {count} guesses ({hits}) correct, expected score: {score}")

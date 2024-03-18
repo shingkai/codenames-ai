@@ -3,8 +3,7 @@ import os
 from typing import Union, Any
 
 import discord
-from discord import Interaction
-from discord._types import ClientT
+from discord import Interaction, Client
 from dotenv import dotenv_values
 
 from codenames.codenames_ai import SpymasterAI, GuesserAI
@@ -119,7 +118,8 @@ class SpyMasterAIButton(discord.ui.Button):
         ai_clues = self.ai_spy.find_clue(self.team)
         log.debug(f"{len(ai_clues)} clues generated")
         clue_strings = "\n".join(
-            [f"'{clue} : {count}' -> {score:.2f} pts -> {list(targets)}" for (clue, count, score, targets) in ai_clues])
+            [f"'{clue.upper()} : {count}' -> {score:.2f} pts -> {list(targets)}" for (clue, count, score, targets) in
+             ai_clues])
         msg = f"{color_emoji(self.team)} AI clue suggestions:```\n{clue_strings}\n```"
         log.debug(msg)
         await interaction.edit_original_response(content=msg)
@@ -152,7 +152,7 @@ class GuesserAIButton(discord.ui.Button):
         super().__init__(label="Ask AI Guesser")
         self.ai_guesser = ai_guesser
 
-    async def callback(self, interaction: Interaction[ClientT]) -> Any:
+    async def callback(self, interaction: Interaction[Client]) -> Any:
         await interaction.response.send_modal(GuesserAIModal(self.ai_guesser))
 
 

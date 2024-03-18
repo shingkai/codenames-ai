@@ -17,10 +17,10 @@ class GensimModel(EmbeddingsModel):
         guesses: list[tuple[str, float]] = []
         remaining_words = copy.deepcopy(words)
         for i in range(n):
-            guess = self.model.most_similar_to_given(clue.lower(), [word.lower() for word in remaining_words])
-            similarity = self.model.similarity(clue.lower(), guess.lower())
+            guess = self.model.most_similar_to_given(clue, remaining_words)
+            similarity = self.model.similarity(clue, guess)
             guesses.append((guess, similarity))
-            remaining_words.remove(guess.upper())
+            remaining_words.remove(guess)
         return guesses
 
 

@@ -60,5 +60,5 @@ class GuesserAI:
         self.model = model
 
     @abstractmethod
-    def find_guess(self, word: str) -> list[tuple[str, float]]:
+    def find_guess(self, word: str, count: int) -> list[tuple[str, float]]:
         pass

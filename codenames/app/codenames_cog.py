@@ -4,12 +4,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from codenames.ai.embeddings_guesser import EmbeddingsGuesser
+from codenames.ai.embeddings_spymaster import EmbeddingsSpy
+from codenames.app.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
 from codenames.codenames_ai import EmbeddingsModel
 from codenames.codenames_engine import Codenames
-from codenames.app.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
-from codenames.ai.embeddings_spymaster import EmbeddingsSpy
-from codenames.ai.embeddings_guesser import EmbeddingsGuesser
-
 
 log = logging.getLogger(__name__)
 
