@@ -19,7 +19,7 @@ class EmbeddingsSpy(SpymasterAI):
         clue_string = '\n'.join(f"{clue[0]} -> {clue[2]} ({100 * clue[1]:.2f})" for clue in initial_clues)
         log.debug(f"initial candidate clues:\n{clue_string}")
         scored_clues: list[tuple[str, int, float, list[str]]] = []
-        public_words = self.game.public_words()
+        public_words = self.game.board.public_unrevealed_words()
         guessed = []
         for (clue, score, targets) in initial_clues:
             if clue in guessed:
@@ -63,7 +63,7 @@ class EmbeddingsSpy(SpymasterAI):
             return []
 
     def _score_guesses(self, team: Team, guesses: list[tuple[str, float]], threshold: float = 0.5) -> tuple[
-            int, float, list[str]]:
+        int, float, list[str]]:
         count = 0
         score = 0.0
         hits = []

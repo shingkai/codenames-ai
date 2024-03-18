@@ -59,6 +59,9 @@ class Board:
     def hidden_cards(self) -> list[tuple[str, CardColor, Optional[CardColor]]]:
         return [(card.word, card.color, card.revealed) for card in self.cards]
 
+    def public_unrevealed_words(self) -> list[str]:
+        return [word for (word, revealed) in self.public_cards() if revealed is None]
+
     def get_word_color(self, word: str) -> CardColor:
         return self._card_color_map()[word]
 
@@ -80,9 +83,6 @@ class Codenames:
         self.turn: Team = "RED"
         self.remaining = {"RED": 9, "BLUE": 8}
         self.assassinated: Optional[Team] = None
-
-    def public_words(self) -> list[str]:
-        return [word for (word, revealed) in self.board.public_cards() if revealed is None]
 
     def winner(self) -> Optional[Team]:
         if self.assassinated is not None:
@@ -108,6 +108,7 @@ class Codenames:
             return None
         if card.color == "BLACK":
             self.assassinated = self.turn
+            self.end_turn()
             return card.color
         if card.color == "GREY":
             self.end_turn()

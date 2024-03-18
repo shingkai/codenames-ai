@@ -1,15 +1,10 @@
 import re
 from abc import ABC, abstractmethod
 
-from gensim.models import KeyedVectors
-
 from codenames_engine import Codenames, Team
 
 
 class EmbeddingsModel(ABC):
-    def __init__(self):
-        self.model: KeyedVectors
-
     @abstractmethod
     def find_centroid_word(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[tuple[str, float]]:
         pass

@@ -1,5 +1,3 @@
-import unittest
-
 from codenames.codenames_engine import Card, Board, Codenames
 
 
@@ -9,7 +7,7 @@ def create_test_board() -> Board:
                         'CHICK', 'GENIUS', 'DRILL', 'LAWYER', 'PLATYPUS', 'WALL'])
 
 
-class TestCard(unittest.TestCase):
+class TestCard:
     def test_reveal(self):
         card = Card("HELLO", "RED")
         assert (card.word, card.color, card.revealed) == ("HELLO", "RED", None)
@@ -18,8 +16,14 @@ class TestCard(unittest.TestCase):
         assert (card.word, card.color, card.revealed) == ("HELLO", "RED", "RED")
         assert card.public_view() == ("HELLO", "RED")
 
+    def test_format(self):
+        card = Card("HELLO", "RED")
+        assert card.__repr__() == "HELLO (RED, revealed=None)"
+        card.reveal()
+        assert card.__repr__() == "HELLO (RED, revealed=RED)"
 
-class TestBoard(unittest.TestCase):
+
+class TestBoard:
 
     def test_create(self):
         board = create_test_board()
@@ -42,16 +46,33 @@ class TestBoard(unittest.TestCase):
             assert color == board.get_word_color(word)
             assert revealed is None
 
+    def test_public_words(self):
+        board = create_test_board()
+        words: list[str] = board.public_unrevealed_words()
+        assert len(words) == 25
+        for word in words:
+            assert word in board.words
+
     def test_reveal(self):
         board = create_test_board()
 
+        assert len(board.public_unrevealed_words()) == 25
         for i in range(len(board.cards)):
             assert board.cards[i].revealed is None
-            board.reveal(board.cards[i].word)
+            assert board.reveal(board.cards[i].word) is not None
             assert board.cards[i].revealed == board.cards[i].color
+            assert len(board.public_unrevealed_words()) == 24 - i
+        assert len(board.public_unrevealed_words()) == 0
+        assert board.reveal(board.cards[0].word) is None
+
+    def test_reveal_missing(self):
+        board = create_test_board()
+        assert len(board.public_unrevealed_words()) == 25
+        board.reveal("NOT_ON_BOARD")
+        assert len(board.public_unrevealed_words()) == 25
 
 
-class TestCodenames(unittest.TestCase):
+class TestCodenames:
     def test_create(self):
         board = create_test_board()
         game = Codenames(board)
@@ -61,16 +82,26 @@ class TestCodenames(unittest.TestCase):
         assert game.remaining.get("BLUE") == 8
         assert game.assassinated is None
 
-    def test_public_words(self):
+    def test_winner_red(self):
         board = create_test_board()
         game = Codenames(board)
-        words: list[str] = game.public_words()
-        assert len(words) == 25
-        for word in words:
-            assert word in board.words
+        assert game.winner() is None
+        game.remaining["RED"] = 0
+        assert game.winner() == "RED"
 
-    def test_winner(self):
-        pass
+    def test_winner_blue(self):
+        board = create_test_board()
+        game = Codenames(board)
+        assert game.winner() is None
+        game.remaining["BLUE"] = 0
+        assert game.winner() == "BLUE"
+
+    def test_winner_assassinated(self):
+        board = create_test_board()
+        game = Codenames(board)
+        assert game.winner() is None
+        game.assassinated = "RED"
+        assert game.winner() == "BLUE"
 
     def test_end_turn(self):
         board = create_test_board()
@@ -80,12 +111,70 @@ class TestCodenames(unittest.TestCase):
         assert game.turn == Codenames.opposite_team(start_turn)
 
     def test_guess(self):
-        pass
+        board = create_test_board()
+        game = Codenames(board)
+        assert len(board.public_unrevealed_words()) == 25
+        assert game.remaining.get("RED") == 9
+        assert game.remaining.get("BLUE") == 8
+        assert game.turn == "RED"
+        assert game.winner() is None
+
+        # guess an invalid word
+        assert game.guess("NOT_ON_BOARD") is None
+        assert len(board.public_unrevealed_words()) == 25
+        assert game.remaining.get("RED") == 9
+        assert game.remaining.get("BLUE") == 8
+        assert game.turn == "RED"
+        assert game.winner() is None
+
+        # guess a red word
+        assert game.guess(board.red[0].word) == "RED"
+        assert len(board.public_unrevealed_words()) == 24
+        assert game.remaining.get("RED") == 8
+        assert game.remaining.get("BLUE") == 8
+        assert game.turn == "RED"
+        assert game.winner() is None
+
+        # guess a blue word
+        assert game.guess(board.blue[0].word) == "BLUE"
+        assert len(board.public_unrevealed_words()) == 23
+        assert game.remaining.get("RED") == 8
+        assert game.remaining.get("BLUE") == 7
+        assert game.turn == "BLUE"
+        assert game.winner() is None
+
+        # guess a grey word
+        assert game.guess(board.grey[0].word) == "GREY"
+        assert len(board.public_unrevealed_words()) == 22
+        assert game.remaining.get("RED") == 8
+        assert game.remaining.get("BLUE") == 7
+        assert game.turn == "RED"
+        assert game.winner() is None
+
+        # re-guess a word
+        assert game.guess(board.grey[0].word) is None
+        assert len(board.public_unrevealed_words()) == 22
+        assert game.remaining.get("RED") == 8
+        assert game.remaining.get("BLUE") == 7
+        assert game.turn == "RED"
+        assert game.winner() is None
+
+        # guess the black word
+        assert game.guess(board.black[0].word) == "BLACK"
+        assert len(board.public_unrevealed_words()) == 21
+        assert game.remaining.get("RED") == 8
+        assert game.remaining.get("BLUE") == 7
+        assert game.turn == "BLUE"
+        assert game.winner() is "BLUE"
+
+        # attempt to guess after the game is over
+        assert game.guess(board.red[1].word) is None
+        assert len(board.public_unrevealed_words()) == 21
+        assert game.remaining.get("RED") == 8
+        assert game.remaining.get("BLUE") == 7
+        assert game.turn == "BLUE"
+        assert game.winner() is "BLUE"
 
     def test_opposite_team(self):
         assert Codenames.opposite_team("RED") == "BLUE"
         assert Codenames.opposite_team("BLUE") == "RED"
-
-
-if __name__ == '__main__':
-    unittest.main()
