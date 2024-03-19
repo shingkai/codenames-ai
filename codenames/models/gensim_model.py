@@ -2,7 +2,7 @@ import copy
 
 import gensim.downloader as gs_api
 
-from embeddings_model import EmbeddingsModel
+from codenames.models.embeddings_model import EmbeddingsModel
 
 
 class GensimModel(EmbeddingsModel):
@@ -25,10 +25,10 @@ class GensimModel(EmbeddingsModel):
 
 
 class Word2VecModel(GensimModel):
-    def __init__(self, model_name="word2vec-google-news-300"):
-        super().__init__(model_name)
+    def __init__(self):
+        super().__init__("word2vec-google-news-300")
 
 
 class FastTextModel(GensimModel):
-    def __init__(self, model_name="fasttext-wiki-news-subwords-300"):
-        super().__init__(model_name)
+    def __init__(self):
+        super().__init__("fasttext-wiki-news-subwords-300")

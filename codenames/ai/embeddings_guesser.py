@@ -1,6 +1,10 @@
+import logging
+
 from codenames.codenames_ai import GuesserAI
 from codenames_engine import Codenames
 from models.embeddings_model import EmbeddingsModel
+
+log = logging.getLogger(__name__)
 
 
 class EmbeddingsGuesser(GuesserAI):
@@ -10,6 +14,7 @@ class EmbeddingsGuesser(GuesserAI):
         self.model = model
 
     def find_guess(self, word: str, count: int = 3) -> list[tuple[str, float]]:
+        log.debug(f"looking for guesses based on clue: {word}")
         words: list[str] = [w.lower() for w in self.game.board.public_unrevealed_words()]
         guess = self.model.find_most_similar_from_list(word.lower(), words, n=count)
         return guess
