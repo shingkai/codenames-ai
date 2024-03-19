@@ -3,14 +3,14 @@ from itertools import combinations
 
 from codenames.codenames_ai import SpymasterAI, GuesserAI
 from codenames.codenames_engine import Team, Codenames
-from models.embeddings_model import EmbeddingsModel
+from codenames.models.codenames_model import CodenamesModel
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 
 class EmbeddingsSpy(SpymasterAI):
-    def __init__(self, game: Codenames, model: EmbeddingsModel, ai_guesser: GuesserAI):
+    def __init__(self, game: Codenames, model: CodenamesModel, ai_guesser: GuesserAI):
         super().__init__(game)
         self.model = model
         self.ai_guesser = ai_guesser

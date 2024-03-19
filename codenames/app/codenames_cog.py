@@ -6,15 +6,17 @@ from discord.ext import commands
 
 from codenames.ai.embeddings_guesser import EmbeddingsGuesser
 from codenames.ai.embeddings_spymaster import EmbeddingsSpy
+from codenames.ai.llm_guesser import LLMGuesser
 from codenames.app.codenames_discord_bot import GameStatusView, PublicBoardView, SpymasterSelectView, SpymasterView
 from codenames.codenames_engine import Codenames
-from models.embeddings_model import EmbeddingsModel
+from codenames.models.codenames_model import CodenamesModel
+from codenames.models.llm_model import FructoseModel
 
 log = logging.getLogger(__name__)
 
 
 class CodenamesCog(commands.Cog):
-    def __init__(self, client, model: EmbeddingsModel):
+    def __init__(self, client, model: CodenamesModel):
         self.client = client
         self.model = model
 

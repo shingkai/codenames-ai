@@ -2,10 +2,10 @@ import copy
 
 import gensim.downloader as gs_api
 
-from codenames.models.embeddings_model import EmbeddingsModel
+from codenames.models.codenames_model import CodenamesModel
 
 
-class GensimModel(EmbeddingsModel):
+class GensimModel(CodenamesModel):
     def __init__(self, model_name):
         super().__init__()
         self.model = gs_api.load(model_name)

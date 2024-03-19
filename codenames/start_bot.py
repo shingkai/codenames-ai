@@ -7,6 +7,7 @@ from discord.ext import commands
 from dotenv import dotenv_values
 
 from app.codenames_cog import CodenamesCog
+from models.llm_model import FructoseModel
 from models.sbert_model import MiniLMModel
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -26,11 +27,11 @@ env = dotenv_values(os.path.join(pkg_root, '.env'))
 # multi_arm_vector_engine = MultiArmModel([word2vec_engine, fasttext_engine])
 # noop_model = MultiArmModel([])
 
+# model = noop_model
 model = MiniLMModel()
-
 # model = fasttext_engine
 # model = multi_arm_vector_engine
-# model = noop_model
+# model = FructoseModel()
 
 # setup discord bot
 intents = discord.Intents.default()

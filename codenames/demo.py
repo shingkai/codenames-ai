@@ -4,7 +4,7 @@ import sys
 from ai.embeddings_guesser import EmbeddingsGuesser
 from ai.embeddings_spymaster import EmbeddingsSpy
 from codenames_engine import Codenames
-from models.embeddings_model import Word2VecModel, FastTextModel
+from codenames.models.codenames_model import Word2VecModel, FastTextModel
 from models.multi_arm_model import MultiArmModel
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

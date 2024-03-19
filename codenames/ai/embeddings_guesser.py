@@ -2,14 +2,14 @@ import logging
 
 from codenames.codenames_ai import GuesserAI
 from codenames_engine import Codenames
-from models.embeddings_model import EmbeddingsModel
+from codenames.models.codenames_model import CodenamesModel
 
 log = logging.getLogger(__name__)
 
 
 class EmbeddingsGuesser(GuesserAI):
 
-    def __init__(self, game: Codenames, model: EmbeddingsModel):
+    def __init__(self, game: Codenames, model: CodenamesModel):
         super().__init__(game)
         self.model = model
 

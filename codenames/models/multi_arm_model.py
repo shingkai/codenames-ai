@@ -1,9 +1,9 @@
-from embeddings_model import EmbeddingsModel
+from codenames.models.codenames_model import CodenamesModel
 
 
-class MultiArmModel(EmbeddingsModel):
+class MultiArmModel(CodenamesModel):
 
-    def __init__(self, models: list[EmbeddingsModel]):
+    def __init__(self, models: list[CodenamesModel]):
         super().__init__()
         self.models = models
 

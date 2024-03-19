@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class EmbeddingsModel(ABC):
+class CodenamesModel(ABC):
     @abstractmethod
     def find_centroid_word(self, target_cards: list[str], avoid_cards: list[str], n=10) -> list[tuple[str, float]]:
         pass
