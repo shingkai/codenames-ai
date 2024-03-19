@@ -34,7 +34,7 @@ class SBertModel(EmbeddingsModel):
         log.debug(f"opening milvus collection: {prefix} ...")
         self.embeddings = EmbeddingsDB(collection_name=prefix)
         if self.embeddings.db.num_entities == 0:
-            filename = "words/game_wordpool.txt"
+            filename = "words/10k_wiki_words.txt"
             log.debug(f"loading candidate word dictionary from {filename}")
             with open(filename) as f:
                 dictionary = f.read().splitlines()
