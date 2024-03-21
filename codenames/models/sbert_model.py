@@ -1,6 +1,8 @@
+import os
 import logging
 from typing import Optional
 
+from dotenv import dotenv_values
 import torch
 from pymilvus import (
     connections,
@@ -18,10 +20,11 @@ log = logging.getLogger(__name__)
 
 
 abspath = os.path.abspath(__file__)
-pkg_root = os.path.dirname(os.path.dirname(abspath))
+pkg_root = os.path.dirname(os.path.dirname(os.path.dirname(abspath)))
 env = dotenv_values(os.path.join(pkg_root, '.env'))
 
-CLUE_POOL_FILE = env["CLUE_POOL_FILE"]
+CLUE_POOL_FILE = env['CLUE_POOL_FILE']
+EMBEDDING_COLLECTION_NAME = env['EMBEDDING_COLLECTION_NAME']
 
 
 class SBertModel(CodenamesModel):
@@ -37,7 +40,7 @@ class SBertModel(CodenamesModel):
 
     def _initialize_embeddings(self):
         log.debug(f"loading embeddings...")
-        prefix = CLUE_POOL_FILE
+        prefix = EMBEDDING_COLLECTION_NAME
         log.debug(f"opening milvus collection: {prefix} ...")
         self.embeddings = EmbeddingsDB(collection_name=prefix)
         if self.embeddings.db.num_entities == 0:
