@@ -1,0 +1,6 @@
+discord.py
+python-dotenv
+fructose
+torch
+pymilvus
+sentence-transformers
