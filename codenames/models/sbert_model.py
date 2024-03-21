@@ -17,6 +17,13 @@ from codenames.models.codenames_model import CodenamesModel
 log = logging.getLogger(__name__)
 
 
+abspath = os.path.abspath(__file__)
+pkg_root = os.path.dirname(os.path.dirname(abspath))
+env = dotenv_values(os.path.join(pkg_root, '.env'))
+
+CLUE_POOL_FILE = env["CLUE_POOL_FILE"]
+
+
 class SBertModel(CodenamesModel):
     def __init__(self, model_name):
         super().__init__()
@@ -30,11 +37,11 @@ class SBertModel(CodenamesModel):
 
     def _initialize_embeddings(self):
         log.debug(f"loading embeddings...")
-        prefix = "sbert_10k_wiki_words"
+        prefix = CLUE_POOL_FILE
         log.debug(f"opening milvus collection: {prefix} ...")
         self.embeddings = EmbeddingsDB(collection_name=prefix)
         if self.embeddings.db.num_entities == 0:
-            filename = "words/10k_wiki_words.txt"
+            filename = CLUE_POOL_FILE
             log.debug(f"loading candidate word dictionary from {filename}")
             with open(filename) as f:
                 dictionary = f.read().splitlines()
