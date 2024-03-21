@@ -49,7 +49,7 @@ class SBertModel(CodenamesModel):
             with open(filename) as f:
                 dictionary = f.read().splitlines()
                 for word in dictionary:
-                    self.embeddings.put([word], [self._get_vector(word)])
+                    self.embeddings.put([word.lower()], [self._get_vector(word.lower())])
 
     def find_most_similar_from_list(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
         clue_vector = self._get_vector(clue)
