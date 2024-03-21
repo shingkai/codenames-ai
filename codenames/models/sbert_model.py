@@ -48,7 +48,7 @@ class SBertModel(CodenamesModel):
             log.debug(f"loading candidate word dictionary from {filename}")
             with open(filename) as f:
                 dictionary = f.read().splitlines()
-                for word in dictionary:
+                for word in dictionary if len(word) < 32:
                     self.embeddings.put([word.lower()], [self._get_vector(word.lower())])
 
     def find_most_similar_from_list(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
