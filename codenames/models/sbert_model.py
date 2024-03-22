@@ -46,11 +46,16 @@ class SBertModel(CodenamesModel):
         if self.embeddings.db.num_entities == 0:
             filename = CLUE_POOL_FILE
             log.debug(f"loading candidate word dictionary from {filename}")
+            
             with open(filename) as f:
                 dictionary = f.read().splitlines()
-                for word in dictionary:
-                    if len(word) < 32:
-                        self.embeddings.put([word.lower()], [self._get_vector(word.lower())])
+                for word in filter(SBertModel._filter, dictionary):
+                    self.embeddings.put([word.lower()], [self._get_vector(word.lower())])
+
+    @staticmethod
+    def _filter(word):
+        return len(word) > 2 and len(word) < 30 and word.isalpha()
+
 
     def find_most_similar_from_list(self, clue: str, words: list[str], n=10) -> list[tuple[str, float]]:
         clue_vector = self._get_vector(clue)
